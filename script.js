@@ -1,325 +1,3 @@
-// function calcolaKPICampagna(
-//   speseAnnuncio,
-//   impresioniAnnuncio,
-//   clickAnnuncio,
-//   leadAnnuncio,
-//   conversioniAnnuncio,
-//   ricaviAnnuncio,
-// ) {
-//   const ctrAnnuncio =
-//     impresioniAnnuncio > 0
-//       ? ((clickAnnuncio / impresioniAnnuncio) * 100).toFixed(2)
-//       : "0.00";
-//   const cpcAnnuncio =
-//     clickAnnuncio > 0 ? (speseAnnuncio / clickAnnuncio).toFixed(2) : "0.00";
-//   const cpmAnnuncio =
-//     impresioniAnnuncio > 0
-//       ? ((speseAnnuncio / impresioniAnnuncio) * 1000).toFixed(2)
-//       : "0.00";
-//   const cplAnnuncio =
-//     leadAnnuncio > 0 ? (speseAnnuncio / leadAnnuncio).toFixed(2) : "0.00";
-//   const cpaAnnuncio =
-//     conversioniAnnuncio > 0
-//       ? (speseAnnuncio / conversioniAnnuncio).toFixed(2)
-//       : "0.00";
-//   const roasAnnuncio =
-//     speseAnnuncio > 0 ? (ricaviAnnuncio / speseAnnuncio).toFixed(2) : "0.00";
-
-//   return {
-//     ctr: ctrAnnuncio,
-//     cpc: cpcAnnuncio,
-//     cpm: cpmAnnuncio,
-//     cpl: cplAnnuncio,
-//     cpa: cpaAnnuncio,
-//     roas: roasAnnuncio,
-//   };
-// }
-
-// function aggiungiCampagna() {
-//   const form = document.querySelector(".form-campagna");
-
-//   const nuovaCampagna = {
-//     cliente: document.getElementById("cliente").value,
-//     campagna: document.getElementById("campagna").value,
-//     piattaforma: document.getElementById("piattaforma").value,
-//     periodo: document.getElementById("periodo").value,
-//     obiettivo: document.getElementById("obiettivo").value,
-//     budget: document.getElementById("budget").value,
-//     spesa: document.getElementById("spesa").value,
-//     impression: document.getElementById("impression").value,
-//     copertura: document.getElementById("copertura").value,
-//     click: document.getElementById("click").value,
-//     lead: document.getElementById("lead").value,
-//     conversioni: document.getElementById("conversioni").value,
-//     ricavi: document.getElementById("ricavi").value,
-//     id: Date.now(),
-//   };
-
-//   let campagne = localStorage.getItem("campaigns");
-//   campagne = campagne ? JSON.parse(campagne) : [];
-//   campagne.push(nuovaCampagna);
-//   localStorage.setItem("campaigns", JSON.stringify(campagne));
-//   alert("Campagna salvata!");
-//   form.reset();
-//   mostraCampagne();
-// }
-
-// function mostraCampagne() {
-//   const corpotabella = document.getElementById("campagnatabella");
-//   corpotabella.innerHTML = "";
-
-//   let campagne = localStorage.getItem("campaigns");
-//   campagne = campagne ? JSON.parse(campagne) : [];
-
-//   if (campagne.length === 0) {
-//     corpotabella.innerHTML = `
-//       <tr>
-//         <td colspan="17" class="rigavuota">
-//           <i>Qui non c'è ancora niente.
-//           <a href="#nuovacampagna">Inserisci la prima campagna</a>
-//           e i totali si aggiornano da soli.</i>
-//         </td>
-//       </tr>
-//     `;
-//     aggiornaTotali();
-//     return;
-//   }
-
-//   campagne.reverse().forEach((campagna) => {
-//     const speseAnnuncio =
-//       parseFloat(String(campagna.spesa).replace(/\./g, "")) || 0;
-//     const impresioniAnnuncio =
-//       parseFloat(String(campagna.impression).replace(/\./g, "")) || 0;
-//     const clickAnnuncio =
-//       parseFloat(String(campagna.click).replace(/\./g, "")) || 0;
-//     const leadAnnuncio =
-//       parseFloat(String(campagna.lead).replace(/\./g, "")) || 0;
-//     const conversioniAnnuncio =
-//       parseFloat(String(campagna.conversioni).replace(/\./g, "")) || 0;
-//     const ricaviAnnuncio =
-//       parseFloat(String(campagna.ricavi).replace(/\./g, "")) || 0;
-
-//     const kpiAnnuncio = calcolaKPICampagna(
-//       speseAnnuncio,
-//       impresioniAnnuncio,
-//       clickAnnuncio,
-//       leadAnnuncio,
-//       conversioniAnnuncio,
-//       ricaviAnnuncio,
-//     );
-
-//     const rigaTabella = document.createElement("tr");
-//     rigaTabella.innerHTML = `
-//       <td>${campagna.cliente}</td>
-//       <td>${campagna.campagna}</td>
-//       <td><span class="platform">${campagna.piattaforma}</span></td>
-//       <td>${campagna.periodo}</td>
-//       <td class="num">€ ${speseAnnuncio.toFixed(2)}</td>
-//       <td class="num">${impresioniAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">${clickAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">${kpiAnnuncio.ctr}%</td>
-//       <td class="num">€ ${kpiAnnuncio.cpc}</td>
-//       <td class="num">€ ${kpiAnnuncio.cpm}</td>
-//       <td class="num">${leadAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">€ ${kpiAnnuncio.cpl}</td>
-//       <td class="num">${conversioniAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">€ ${kpiAnnuncio.cpa}</td>
-//       <td class="num">€ ${ricaviAnnuncio.toFixed(2)}</td>
-//       <td class="num ${kpiAnnuncio.roas > 1 ? "roas-good" : ""}">${kpiAnnuncio.roas}x</td>
-//       <td class="row-actions">
-//         <button class="bot-svuota" onclick="eliminaCampagna(${campagna.id})">Elimina</button>
-//       </td>
-//     `;
-
-//     corpotabella.appendChild(rigaTabella);
-//   });
-
-//   aggiornaTotali();
-// }
-
-// window.addEventListener("load", mostraCampagne);
-
-// // ELIMINA CAMPAGNA
-
-// function eliminaCampagna(id) {
-//   let campagne = localStorage.getItem("campaigns");
-//   campagne = campagne ? JSON.parse(campagne) : [];
-
-//   campagne = campagne.filter((c) => c.id !== id);
-//   localStorage.setItem("campaigns", JSON.stringify(campagne));
-//   mostraCampagne();
-// }
-
-// // AGGIORNA TOTALI
-
-// function aggiornaTotali() {
-//   let campagne = localStorage.getItem("campaigns");
-//   campagne = campagne ? JSON.parse(campagne) : [];
-
-//   let totaleSpeseAnnunci = 0;
-//   let totaleImpressioniAnnunci = 0;
-//   let totaleClickAnnunci = 0;
-//   let totaleLead = 0;
-
-//   campagne.forEach((campagna) => {
-//     totaleSpeseAnnunci +=
-//       parseFloat(String(campagna.spesa).replace(/\./g, "")) || 0;
-//     totaleImpressioniAnnunci +=
-//       parseFloat(String(campagna.impression).replace(/\./g, "")) || 0;
-//     totaleClickAnnunci +=
-//       parseFloat(String(campagna.click).replace(/\./g, "")) || 0;
-//     totaleLead += parseFloat(String(campagna.lead).replace(/\./g, "")) || 0;
-//   });
-
-//   const totaleCTRCalcolato =
-//     totaleImpressioniAnnunci > 0
-//       ? ((totaleClickAnnunci / totaleImpressioniAnnunci) * 100).toFixed(2)
-//       : "0.00";
-//   const totaleCPLCalcolato =
-//     totaleLead > 0 ? (totaleSpeseAnnunci / totaleLead).toFixed(2) : "0.00";
-
-//   document.getElementById("totalespesa").textContent =
-//     "€" + totaleSpeseAnnunci.toFixed(2);
-//   document.getElementById("totaleimpression").textContent =
-//     totaleImpressioniAnnunci.toLocaleString("it-IT");
-//   document.getElementById("totaleclick").textContent =
-//     totaleClickAnnunci.toLocaleString("it-IT");
-//   document.getElementById("totalectr").textContent = totaleCTRCalcolato + "%";
-//   document.getElementById("totalelead").textContent =
-//     totaleLead.toLocaleString("it-IT");
-//   document.getElementById("totalecpl").textContent = "€" + totaleCPLCalcolato;
-// }
-
-// function pulisciForm() {
-//   const formularioNuovaCampagna = document.querySelector(".form-campagna");
-//   formularioNuovaCampagna.reset();
-// }
-
-// function popolaSelectClienti() {
-//   let campagne = localStorage.getItem("campaigns");
-//   campagne = campagne ? JSON.parse(campagne) : [];
-
-//   const clientiUnici = [...new Set(campagne.map((c) => c.cliente))];
-//   const selectClienti = document.querySelector(".select-clienti");
-
-//   selectClienti.innerHTML = '<option value="tutti">Tutti i clienti</option>';
-
-//   clientiUnici.forEach((cliente) => {
-//     const option = document.createElement("option");
-//     option.value = cliente;
-//     option.textContent = cliente;
-//     selectClienti.appendChild(option);
-//   });
-// }
-
-// function applicaFiltri() {
-//   let campagne = localStorage.getItem("campaigns");
-//   campagne = campagne ? JSON.parse(campagne) : [];
-
-//   const inputRicerca = document
-//     .getElementById("cercaCampagna")
-//     .value.toLowerCase();
-//   const selectClienti = document.querySelector(".select-clienti").value;
-//   const selectPiattaforme = document.querySelector(".select-piattaforme").value;
-
-//   const campagneFiltrate = campagne.filter((campagna) => {
-//     const matchRicerca =
-//       campagna.cliente.toLowerCase().includes(inputRicerca) ||
-//       campagna.campagna.toLowerCase().includes(inputRicerca);
-//     const matchCliente =
-//       selectClienti === "tutti" || campagna.cliente === selectClienti;
-//     const matchPiattaforma =
-//       selectPiattaforme === "tutti" ||
-//       campagna.piattaforma
-//         .toLowerCase()
-//         .includes(selectPiattaforme.replace("ads", "").toLowerCase());
-
-//     return matchRicerca && matchCliente && matchPiattaforma;
-//   });
-
-//   mostraCampagneFiltrate(campagneFiltrate);
-// }
-
-// function mostraCampagneFiltrate(campagneFiltrate) {
-//   const corpotabella = document.getElementById("campagnatabella");
-//   corpotabella.innerHTML = "";
-
-//   if (campagneFiltrate.length === 0) {
-//     corpotabella.innerHTML = `
-//       <tr>
-//         <td colspan="17" class="rigavuota">
-//           <i>Nessuna campagna corrisponde ai filtri selezionati.</i>
-//         </td>
-//       </tr>
-//     `;
-//     return;
-//   }
-
-//   campagneFiltrate.reverse().forEach((campagna) => {
-//     const speseAnnuncio =
-//       parseFloat(String(campagna.spesa).replace(/\./g, "")) || 0;
-//     const impresioniAnnuncio =
-//       parseFloat(String(campagna.impression).replace(/\./g, "")) || 0;
-//     const clickAnnuncio =
-//       parseFloat(String(campagna.click).replace(/\./g, "")) || 0;
-//     const leadAnnuncio =
-//       parseFloat(String(campagna.lead).replace(/\./g, "")) || 0;
-//     const conversioniAnnuncio =
-//       parseFloat(String(campagna.conversioni).replace(/\./g, "")) || 0;
-//     const ricaviAnnuncio =
-//       parseFloat(String(campagna.ricavi).replace(/\./g, "")) || 0;
-
-//     const kpiAnnuncio = calcolaKPICampagna(
-//       speseAnnuncio,
-//       impresioniAnnuncio,
-//       clickAnnuncio,
-//       leadAnnuncio,
-//       conversioniAnnuncio,
-//       ricaviAnnuncio,
-//     );
-
-//     const rigaTabella = document.createElement("tr");
-//     rigaTabella.innerHTML = `
-//       <td>${campagna.cliente}</td>
-//       <td>${campagna.campagna}</td>
-//       <td><span class="platform">${campagna.piattaforma}</span></td>
-//       <td>${campagna.periodo}</td>
-//       <td class="num">€ ${speseAnnuncio.toFixed(2)}</td>
-//       <td class="num">${impresioniAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">${clickAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">${kpiAnnuncio.ctr}%</td>
-//       <td class="num">€ ${kpiAnnuncio.cpc}</td>
-//       <td class="num">€ ${kpiAnnuncio.cpm}</td>
-//       <td class="num">${leadAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">€ ${kpiAnnuncio.cpl}</td>
-//       <td class="num">${conversioniAnnuncio.toLocaleString("it-IT")}</td>
-//       <td class="num">€ ${kpiAnnuncio.cpa}</td>
-//       <td class="num">€ ${ricaviAnnuncio.toFixed(2)}</td>
-//       <td class="num ${kpiAnnuncio.roas > 1 ? "roas-good" : ""}">${kpiAnnuncio.roas}x</td>
-//       <td class="row-actions">
-//         <button class="bot-svuota" onclick="eliminaCampagna(${campagna.id})">Elimina</button>
-//       </td>
-//     `;
-
-//     corpotabella.appendChild(rigaTabella);
-//   });
-// }
-
-// window.addEventListener("load", () => {
-//   mostraCampagne();
-//   popolaSelectClienti();
-
-//   document
-//     .getElementById("cercaCampagna")
-//     .addEventListener("input", applicaFiltri);
-//   document
-//     .querySelector(".select-clienti")
-//     .addEventListener("change", applicaFiltri);
-//   document
-//     .querySelector(".select-piattaforme")
-//     .addEventListener("change", applicaFiltri);
-// });
-
 const CHIAVE_STORAGE = "campaigns";
 
 const MESSAGGIO_VUOTO = `
@@ -339,6 +17,24 @@ const MESSAGGIO_NESSUN_RISULTATO = `
     </td>
   </tr>
 `;
+
+const COLONNE_CSV = [
+  "cliente",
+  "campagna",
+  "piattaforma",
+  "periodo",
+  "obiettivo",
+  "budget",
+  "spesa",
+  "impression",
+  "copertura",
+  "click",
+  "lead",
+  "conversioni",
+  "ricavi",
+];
+
+const SEPARATORE_CSV = ";";
 
 function leggiCampagne() {
   try {
@@ -517,6 +213,37 @@ function popolaSelectClienti() {
   selectClienti.value = clientiUnici.includes(selezionato) ? selezionato : "tutti";
 }
 
+function nomeMese(periodo) {
+  const [anno, mese] = String(periodo).split("-").map(Number);
+  if (!/^\d{4}-\d{2}$/.test(periodo) || mese < 1 || mese > 12) return periodo;
+
+  const testoMese = new Date(anno, mese - 1, 1).toLocaleDateString("it-IT", {
+    month: "long",
+    year: "numeric",
+  });
+  return testoMese.charAt(0).toUpperCase() + testoMese.slice(1);
+}
+
+function popolaSelectMesi() {
+  const selectMesi = document.querySelector(".select-mese");
+  const meseSelezionato = selectMesi.value;
+
+  const mesiUnici = [
+    ...new Set(leggiCampagne().map((c) => String(c.periodo ?? "").trim()).filter(Boolean)),
+  ].sort((a, b) => b.localeCompare(a));
+
+  selectMesi.innerHTML = '<option value="tutti">Tutti i mesi</option>';
+
+  mesiUnici.forEach((periodo) => {
+    const opzioneMese = document.createElement("option");
+    opzioneMese.value = periodo;
+    opzioneMese.textContent = nomeMese(periodo);
+    selectMesi.appendChild(opzioneMese);
+  });
+
+  selectMesi.value = mesiUnici.includes(meseSelezionato) ? meseSelezionato : "tutti";
+}
+
 function applicaFiltri() {
   const campagne = leggiCampagne();
 
@@ -524,6 +251,7 @@ function applicaFiltri() {
   const clienteScelto = document.querySelector(".select-clienti").value;
   const piattaformaScelta = document.querySelector(".select-piattaforme").value;
   const piattaformaCercata = piattaformaScelta.toLowerCase().replace("ads", "").trim();
+  const meseScelto = document.querySelector(".select-mese").value;
 
   const campagneFiltrate = campagne.filter((campagna) => {
     const cliente = String(campagna.cliente ?? "");
@@ -536,8 +264,10 @@ function applicaFiltri() {
     const matchCliente = clienteScelto === "tutti" || cliente === clienteScelto;
     const matchPiattaforma =
       piattaformaScelta === "tutti" || piattaforma.includes(piattaformaCercata);
+    const matchMese =
+      meseScelto === "tutti" || String(campagna.periodo ?? "").trim() === meseScelto;
 
-    return matchRicerca && matchCliente && matchPiattaforma;
+    return matchRicerca && matchCliente && matchPiattaforma && matchMese;
   });
 
   mostraCampagne(campagneFiltrate, campagne.length > 0);
@@ -545,6 +275,7 @@ function applicaFiltri() {
 
 function aggiornaVista() {
   popolaSelectClienti();
+  popolaSelectMesi();
   applicaFiltri();
 }
 
@@ -594,10 +325,214 @@ function pulisciForm() {
   document.querySelector(".form-campagna").reset();
 }
 
+function normalizzaTesto(testo) {
+  return String(testo ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function proteggiCampoCSV(valore) {
+  const testo = String(valore ?? "");
+  const servonoVirgolette = testo.includes(SEPARATORE_CSV) || /["\r\n]/.test(testo);
+  return servonoVirgolette ? `"${testo.replace(/"/g, '""')}"` : testo;
+}
+
+function valorePerCSV(campagna, campo) {
+  if (document.getElementById(campo).type === "number") {
+    return String(parseNumero(campagna[campo])).replace(".", ",");
+  }
+  return String(campagna[campo] ?? "");
+}
+
+function valoreComeDalModulo(campo, valore) {
+  const campoModulo = document.getElementById(campo);
+
+  if (campoModulo.type === "number") {
+    return String(parseNumero(valore));
+  }
+
+  if (campoModulo.tagName === "SELECT") {
+    const opzioneCorrispondente = [...campoModulo.options].find(
+      (opzione) => normalizzaTesto(opzione.value) === normalizzaTesto(valore),
+    );
+    return opzioneCorrispondente ? opzioneCorrispondente.value : valore;
+  }
+
+  return valore;
+}
+
+function scomponiCSV(testo) {
+  const primaRiga = testo.split(/\r\n|\n|\r/).find((riga) => riga.trim() !== "") ?? "";
+  const separatore = primaRiga.split(";").length >= primaRiga.split(",").length ? ";" : ",";
+  const righe = [];
+  let rigaCorrente = [];
+  let cellaCorrente = "";
+  let traVirgolette = false;
+
+  for (let posizione = 0; posizione < testo.length; posizione++) {
+    const carattere = testo[posizione];
+
+    if (traVirgolette) {
+      if (carattere !== '"') {
+        cellaCorrente += carattere;
+      } else if (testo[posizione + 1] === '"') {
+        cellaCorrente += '"';
+        posizione++;
+      } else {
+        traVirgolette = false;
+      }
+    } else if (carattere === '"' && cellaCorrente === "") {
+      traVirgolette = true;
+    } else if (carattere === separatore) {
+      rigaCorrente.push(cellaCorrente);
+      cellaCorrente = "";
+    } else if (carattere === "\r" || carattere === "\n") {
+      if (carattere === "\r" && testo[posizione + 1] === "\n") posizione++;
+      rigaCorrente.push(cellaCorrente);
+      righe.push(rigaCorrente);
+      rigaCorrente = [];
+      cellaCorrente = "";
+    } else {
+      cellaCorrente += carattere;
+    }
+  }
+
+  rigaCorrente.push(cellaCorrente);
+  righe.push(rigaCorrente);
+
+  return righe.filter((riga) => riga.some((cella) => cella.trim() !== ""));
+}
+
+async function leggiTestoFile(file) {
+  const contenuto = await file.arrayBuffer();
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(contenuto);
+  } catch {
+    return new TextDecoder("windows-1252").decode(contenuto);
+  }
+}
+
+function scegliFileCSV() {
+  document.getElementById("fileimporta").click();
+}
+
+async function importaCSV(selettoreFile) {
+  const fileScelto = selettoreFile.files[0];
+  selettoreFile.value = "";
+  if (!fileScelto) return;
+
+  const testoFile = await leggiTestoFile(fileScelto);
+  const [intestazione = [], ...righeDati] = scomponiCSV(testoFile);
+  const colonne = intestazione.map(normalizzaTesto);
+
+  if (!colonne.includes("cliente") || !colonne.includes("campagna")) {
+    alert("Il file non contiene le colonne Cliente e Campagna, quindi non può essere importato.");
+    return;
+  }
+
+  if (righeDati.length === 0) {
+    alert("Nel file non ci sono campagne da importare.");
+    return;
+  }
+
+  const campagne = leggiCampagne();
+  const idUsati = new Set(campagne.map((campagna) => Number(campagna.id)));
+  let nuovoId = Date.now();
+
+  righeDati.forEach((riga) => {
+    while (idUsati.has(nuovoId)) nuovoId--;
+    idUsati.add(nuovoId);
+
+    const nuovaCampagna = { id: nuovoId };
+    COLONNE_CSV.forEach((campo) => {
+      const indiceColonna = colonne.indexOf(campo);
+      const valore = indiceColonna >= 0 ? String(riga[indiceColonna] ?? "").trim() : "";
+      nuovaCampagna[campo] = valoreComeDalModulo(campo, valore);
+    });
+
+    campagne.push(nuovaCampagna);
+  });
+
+  salvaCampagne(campagne);
+
+  alert(righeDati.length === 1 ? "Campagna importata!" : `${righeDati.length} campagne importate!`);
+  aggiornaVista();
+}
+
+async function scaricaCSV() {
+  const campagne = leggiCampagne();
+
+  if (campagne.length === 0) {
+    alert("Non ci sono campagne da scaricare.");
+    return;
+  }
+
+  const intestazione = COLONNE_CSV.map((campo) => campo.charAt(0).toUpperCase() + campo.slice(1));
+  const righeCampagne = campagne.map((campagna) =>
+    COLONNE_CSV.map((campo) => valorePerCSV(campagna, campo)),
+  );
+  const testoCSV = [intestazione, ...righeCampagne]
+    .map((riga) => riga.map(proteggiCampoCSV).join(SEPARATORE_CSV))
+    .join("\r\n");
+
+  const oggi = new Date();
+  const dataFile = [
+    oggi.getFullYear(),
+    String(oggi.getMonth() + 1).padStart(2, "0"),
+    String(oggi.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  const nomeProposto = `report-mensile-adv-${dataFile}.csv`;
+  const fileCSV = new Blob(["﻿" + testoCSV], { type: "text/csv;charset=utf-8" });
+
+  if (window.showSaveFilePicker) {
+    try {
+      const destinazione = await window.showSaveFilePicker({
+        suggestedName: nomeProposto,
+        types: [{ description: "File CSV", accept: { "text/csv": [".csv"] } }],
+      });
+      const scrittura = await destinazione.createWritable();
+      await scrittura.write(fileCSV);
+      await scrittura.close();
+    } catch (errore) {
+      if (errore.name !== "AbortError") {
+        alert("Non è stato possibile salvare il file.");
+      }
+    }
+    return;
+  }
+
+  const nomeScelto = (prompt("Come vuoi chiamare il file?", nomeProposto) ?? "").trim();
+  if (nomeScelto === "") return;
+
+  const indirizzoFile = URL.createObjectURL(fileCSV);
+  const collegamento = document.createElement("a");
+
+  collegamento.href = indirizzoFile;
+  collegamento.download = nomeScelto.toLowerCase().endsWith(".csv")
+    ? nomeScelto
+    : `${nomeScelto}.csv`;
+  document.body.appendChild(collegamento);
+  collegamento.click();
+  collegamento.remove();
+  setTimeout(() => URL.revokeObjectURL(indirizzoFile), 0);
+}
+
+function svuotaTutto() {
+  const messaggioConferma =
+    "Vuoi cancellare tutte le campagne salvate? L'operazione non si può annullare.";
+  if (leggiCampagne().length > 0 && !confirm(messaggioConferma)) return;
+
+  localStorage.removeItem(CHIAVE_STORAGE);
+  document.getElementById("cercaCampagna").value = "";
+  document.querySelector(".select-piattaforme").value = "tutti";
+  pulisciForm();
+  aggiornaVista();
+}
+
 window.addEventListener("load", () => {
   document.getElementById("cercaCampagna").addEventListener("input", applicaFiltri);
   document.querySelector(".select-clienti").addEventListener("change", applicaFiltri);
   document.querySelector(".select-piattaforme").addEventListener("change", applicaFiltri);
+  document.querySelector(".select-mese").addEventListener("change", applicaFiltri);
 
   document.getElementById("campagnatabella").addEventListener("click", (evento) => {
     const bottone = evento.target.closest("button[data-id]");
@@ -607,4 +542,23 @@ window.addEventListener("load", () => {
   });
 
   aggiornaVista();
+});
+
+  // AGGIORNA DATA 
+
+function aggiornaDataReport() {
+  const elementoData = document.querySelector(".data");
+  if (!elementoData) return;
+
+  const oggi = new Date();
+  const giorno = oggi.getDate();
+  const mese = oggi.toLocaleDateString("it-IT", { month: "long" });
+  const giornoTesto = giorno === 1 ? "1°" : giorno;
+
+  elementoData.textContent = `Aggiornato al ${giornoTesto} ${mese}`;
+}
+
+window.addEventListener("load", () => {
+  aggiornaDataReport();
+  setInterval(aggiornaDataReport, 60000);
 });

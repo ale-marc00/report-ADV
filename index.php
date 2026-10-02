@@ -21,7 +21,7 @@
                 <h1>Report mensile ADV</h1>
                 <p class="sottotitolo">Campagne ADV — spesa, risultati e costi per cliente</p>
             </div>
-            <p class="data">Aggiornato al 30 settembre</p>
+            <p class="data"></p>
         </header>
 
         <hr>
@@ -42,12 +42,15 @@
                     <option value="tiktokads">TikTok ADS</option>
                     <option value="linkedinads">LinkedIn ADS</option>
                 </select>
+                <select class="select-mese">
+                    <option value="tutti">Tutti i mesi</option>
+                </select>
             </div>
             <div class="azioni">
-                <button  onclick="" class="bot-azioni" title="Riapri un report salvato in precedenza">Importa CSV</button>
-                <input type="file" onchange="" accept=".csv, text/csv" hidden></input>
-                <button  onclick="" class="bot-azioni">Scarica CSV</button>
-                <button  onclick="" class="bot-svuota">Svuota tutto</button>
+                <button  onclick="scegliFileCSV()" class="bot-azioni" title="Riapri un report salvato in precedenza">Importa CSV</button>
+                <input type="file" id="fileimporta" onchange="importaCSV(this)" accept=".csv, text/csv" hidden></input>
+                <button  onclick="scaricaCSV()" class="bot-azioni">Scarica CSV</button>
+                <button  onclick="svuotaTutto()" class="bot-svuota">Svuota tutto</button>
             </div>
         </div>
         <!-- DATI -->
@@ -127,31 +130,10 @@
                     <tr>
                         <td colspan="17" class="rigavuota">
                         </td>
-                    </tr>
+                     </tr>
             </table>
         </div>
-    </section>
-    <!-- <div class="grafici">
-        <section class="grafico">
-            <div class="grafic-head">
-                <h2>Dove vanno i soldi</h2>
-                <span class="suggerimento">spesa, ultime 8 campagne</span>
-            </div>
-            <div id="graficospese" class="graficobarre">
-                <p class="vuoto">Il grafico compare appena c'è almeno una campagna.</p>
-            </div>
-        </section>
-        
-        <section class="grafico">
-            <div class="grafico-head">
-                <h2>Cosa portano a casa</h2>
-                <span class="suggerimento">lead, ultime 8 campagne</span>
-            </div>
-            <div id="graficospese" class="graficobarre">
-                <p class="vuoto">Il grafico compare appena c'è almeno una campagna.</p>
-            </div>
-        </section>
-    </div> -->
+</section>
 
 
     <!-- INSERIMENTO CAMPAGNA -->
