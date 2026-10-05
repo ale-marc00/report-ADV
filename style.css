@@ -405,6 +405,47 @@ legend {
   border-top: 1px dashed var(--rule);
 }
 
+/* FINESTRE */
+
+.dialogo {
+  box-sizing: border-box;
+  width: min(560px, calc(100% - 32px));
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--surface);
+  color: inherit;
+  padding: 22px 24px;
+}
+
+.dialogo::backdrop {
+  background: rgba(38, 37, 36, 0.45);
+}
+
+.dialogo h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+.dialogo .nota {
+  margin: 0 0 18px;
+}
+
+.dialogo .azioni-modulo {
+  margin-top: 20px;
+}
+
+.elenco-file {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scaricato::after {
+  content: " ✓";
+}
+
 /* FOOTER */
 
 .foot {

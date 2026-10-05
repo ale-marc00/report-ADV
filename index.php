@@ -47,8 +47,8 @@
                 </select>
             </div>
             <div class="azioni">
-                <button  onclick="scegliFileCSV()" class="bot-azioni" title="Riapri un report salvato in precedenza">Importa CSV</button>
-                <input type="file" id="fileimporta" onchange="importaCSV(this)" accept=".csv, text/csv" hidden></input>
+                <button  onclick="scegliFileCSV()" class="bot-azioni" title="Importa un CSV di Google Ads o Meta Ads, oppure riapri un report salvato in precedenza">Importa CSV</button>
+                <input type="file" id="fileimporta" onchange="importaCSV(this)" accept=".csv, text/csv" multiple hidden></input>
                 <button  onclick="scaricaCSV()" class="bot-azioni">Scarica CSV</button>
                 <button  onclick="svuotaTutto()" class="bot-svuota">Svuota tutto</button>
             </div>
@@ -249,8 +249,44 @@
             Annulla modifica
         </button>
     </div>
-
 </section>
+
+
+    <dialog class="dialogo" id="dialogoimporta">
+        <form method="dialog">
+            <h2 id="importatitolo">Importa campagne</h2>
+            <p class="nota">Il file non indica il cliente: cliente e mese scelti qui verranno assegnati a tutte le campagne del file.</p>
+
+            <div class="griglia-campi">
+                <div class="campo">
+                    <label for="importacliente">Cliente</label>
+                    <input id="importacliente" type="text" list="elencoclienti" placeholder="Azienda Rossi"
+                        required pattern=".*\S.*" title="Scrivi il nome del cliente">
+                    <datalist id="elencoclienti"></datalist>
+                </div>
+
+                <div class="campo">
+                    <label for="importamese">Mese</label>
+                    <input id="importamese" type="month" required pattern="\d{4}-\d{2}" placeholder="AAAA-MM">
+                </div>
+            </div>
+
+            <div class="azioni-modulo">
+                <button value="importa" class="bot-azioni">Importa</button>
+                <button value="annulla" class="bot-svuota" formnovalidate>Annulla</button>
+            </div>
+        </form>
+    </dialog>
+
+
+    <dialog class="dialogo" id="dialogoesporta">
+        <h2>Scarica CSV</h2>
+        <p class="nota">Ogni piattaforma ha il suo formato, quindi le campagne si scaricano in file separati.</p>
+        <div class="elenco-file" id="elencofilecsv"></div>
+        <form method="dialog" class="azioni-modulo">
+            <button class="bot-svuota">Chiudi</button>
+        </form>
+    </dialog>
 
     <footer class="foot">
         I dati restano salvati solo in questo browser. Per conservare un mese scarica il CSV,
