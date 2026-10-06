@@ -42,6 +42,7 @@
                     <option value="tiktokads">TikTok ADS</option>
                     <option value="linkedinads">LinkedIn ADS</option>
                     <option value="spotifyads">Spotify ADS</option>
+                    <option value="tiktokads">TikTok ADS</option>
                 </select>
                 <select class="select-mese">
                     <option value="tutti">Tutti i mesi</option>

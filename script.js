@@ -95,9 +95,9 @@ const FORMATI_PIATTAFORMA = {
     piattaforma: "Spotify Ads",
     prefissoFile: "spotify-ads",
     soloImport: true,
+    nonSommare: true,
     aggregaPerCampagna: true,
     richiede: ["idgruppodiannunci", "percentualedicompletamento"],
-    // preambolo: true, 
     colonne: [
       { intestazione: "ID campagna", nomi: ["idcampagna", "campaignid"], campo: "idCampagna" },
       { intestazione: "Nome della campagna", nomi: ["nomedellacampagna", "campaignname"], campo: "campagna" },
@@ -115,6 +115,72 @@ const FORMATI_PIATTAFORMA = {
       { intestazione: "Clic", nomi: ["clic", "clicks"], campo: "click", numero: true, decimali: 2 },
       { intestazione: "CTR", nomi: ["ctr"], kpi: "ctr" },
       { intestazione: "Percentuale di completamento", nomi: ["percentualedicompletamento", "completionrate"], campo: "completamento", numero: true, decimali: 2 },
+    ],
+  },
+    linkedin: {
+    piattaforma: "LinkedIn Ads",
+    prefissoFile: "linkedin-ads",
+    richiede: ["campaigngroupname"],
+    colonne: [
+      { intestazione: "Campaign group name", nomi: ["campaigngroupname", "nomegruppodicampagne"], campo: "gruppoCampagne" },
+      { intestazione: "Campaign name", nomi: ["campaignname", "nomecampagna"], campo: "campagna" },
+      { intestazione: "Campaign ID", nomi: ["campaignid", "idcampagna"], campo: "idCampagna" },
+      { intestazione: "Campaign status", nomi: ["campaignstatus", "statocampagna"], campo: "stato" },
+      { intestazione: "Start date", nomi: ["startdate", "datadiinizio"], campo: "dataInizio" },
+      { intestazione: "End date", nomi: ["enddate", "datadifine"], campo: "dataFine" },
+      { intestazione: "Impressions", nomi: ["impressions", "impressioni"], campo: "impression", numero: true },
+      { intestazione: "Clicks", nomi: ["clicks", "clic"], campo: "click", numero: true },
+      { intestazione: "CTR", nomi: ["ctr"], kpi: "ctr" },
+      { intestazione: "Average CPC", nomi: ["averagecpc", "cpcmedio"], kpi: "cpc" },
+      { intestazione: "Average CPM", nomi: ["averagecpm", "cpmmedio"], kpi: "cpm" },
+      { intestazione: "Total spent", nomi: ["totalspent", "spesatotale", "importospeso"], campo: "spesa", numero: true, decimali: 2 },
+      { intestazione: "Social actions", nomi: ["socialactions", "azionisocial"], campo: "azioniSocial", numero: true },
+      { intestazione: "Reactions", nomi: ["reactions", "reazioni"], campo: "reazioni", numero: true },
+      { intestazione: "Comments", nomi: ["comments", "commenti"], campo: "commenti", numero: true },
+      { intestazione: "Shares", nomi: ["shares", "condivisioni"], campo: "condivisioni", numero: true },
+      { intestazione: "Follows", nomi: ["follows", "follower"], campo: "follow", numero: true },
+      { intestazione: "Leads", nomi: ["leads", "lead"], campo: "lead", numero: true },
+      { intestazione: "Conversions", nomi: ["conversions", "conversioni"], campo: "conversioni", numero: true },
+      { intestazione: "Conversion rate", nomi: ["conversionrate", "tassodiconversione"], kpi: "tassoConversione" },
+      { intestazione: "Cost per conversion", nomi: ["costperconversion", "costoperconversione"], kpi: "cpa" },
+    ],
+  },
+    tiktok: {
+    piattaforma: "TikTok Ads",
+    soloImport: true,
+    aggregaPerCampagna: true,
+    richiede: ["clicksdestination"],
+    colonne: [
+      { intestazione: "Date", nomi: ["date", "data"], campo: "data", periodo: "inizio" },
+      { intestazione: "Campaign ID", nomi: ["campaignid"], campo: "idCampagna" },
+      { intestazione: "Campaign name", nomi: ["campaignname"], campo: "campagna" },
+      { intestazione: "Campaign status", nomi: ["campaignstatus"], campo: "stato" },
+      { intestazione: "Objective", nomi: ["objective"], campo: "obiettivo" },
+      { intestazione: "Campaign budget type", nomi: ["campaignbudgettype"], campo: "tipoBudget" },
+      { intestazione: "Campaign budget", nomi: ["campaignbudget"], campo: "budgetCampagna", numero: true, decimali: 2, nonSommare: true },
+      { intestazione: "Currency", nomi: ["currency"], campo: "valuta" },
+      { intestazione: "Cost", nomi: ["cost"], campo: "spesa", numero: true, decimali: 2 },
+      { intestazione: "Impressions", nomi: ["impressions"], campo: "impression", numero: true },
+      { intestazione: "Clicks (destination)", nomi: ["clicksdestination"], campo: "click", numero: true },
+      { intestazione: "Clicks (all)", nomi: ["clicksall"], campo: "clickTotali", numero: true },
+      { intestazione: "CTR (destination)", nomi: ["ctrdestination"], kpi: "ctr" },
+      { intestazione: "CPC (destination)", nomi: ["cpcdestination"], kpi: "cpc" },
+      { intestazione: "CPM", nomi: ["cpm"], kpi: "cpm" },
+      { intestazione: "2-second video views", nomi: ["2secondvideoviews"], campo: "views2s", numero: true },
+      { intestazione: "6-second video views", nomi: ["6secondvideoviews"], campo: "views6s", numero: true },
+      { intestazione: "Video views at 100%", nomi: ["videoviewsat100"], campo: "viewsCompleti", numero: true },
+      { intestazione: "Paid likes", nomi: ["paidlikes"], campo: "reazioni", numero: true },
+      { intestazione: "Paid comments", nomi: ["paidcomments"], campo: "commenti", numero: true },
+      { intestazione: "Paid shares", nomi: ["paidshares"], campo: "condivisioni", numero: true },
+      { intestazione: "Paid follows", nomi: ["paidfollows"], campo: "follow", numero: true },
+      { intestazione: "Conversions", nomi: ["conversions"], campo: "conversioni", numero: true },
+      { intestazione: "CVR (click)", nomi: ["cvrclick"], kpi: "tassoConversione" },
+      { intestazione: "Cost per conversion", nomi: ["costperconversion"], kpi: "cpa" },
+      { intestazione: "Add to cart", nomi: ["addtocart"], campo: "aggiunteCarrello", numero: true },
+      { intestazione: "Initiate checkout", nomi: ["initiatecheckout"], campo: "checkoutIniziati", numero: true },
+      { intestazione: "Complete payment", nomi: ["completepayment"], campo: "acquisti", numero: true },
+      { intestazione: "Complete payment value", nomi: ["completepaymentvalue"], campo: "ricavi", numero: true, decimali: 2 },
+      { intestazione: "Purchase ROAS", nomi: ["purchaseroas"], kpi: "roas" },
     ],
   },
 };
@@ -198,6 +264,7 @@ function calcolaKPICampagna(spesa, impression, click, lead, conversioni, ricavi)
     cpl: dividi(spesa, lead),
     cpa: dividi(spesa, conversioni),
     roas: dividi(ricavi, spesa),
+    tassoConversione: dividi(conversioni, click) * 100,
   };
 }
 
@@ -855,8 +922,8 @@ async function importaCSV(selettoreFile) {
   if (conCampagne.length === 0) {
     alert(
       fileScelti.length === 1
-        ? "Il file non è un CSV di Google Ads, Meta Ads, Spotify Ads o di questo sito (con le colonne Cliente e Campagna), quindi non può essere importato."
-        : "Nessuno dei file contiene campagne di Google Ads, Meta Ads, Spotify Ads o di questo sito, quindi non c'è niente da importare.",
+        ? "Il file non è un CSV di Google Ads, Meta Ads, Spotify Ads, LinkedIn Ads, TikTok Ads o di questo sito (con le colonne Cliente e Campagna), quindi non può essere importato."
+        : "Nessuno dei file contiene campagne di Google Ads, Meta Ads, Spotify Ads, LinkedIn Ads, TikTok Ads o di questo sito, quindi non c'è niente da importare.",
     );
     return;
   }
@@ -874,7 +941,7 @@ async function importaCSV(selettoreFile) {
 
     const formato = FORMATI_PIATTAFORMA[tabella.formato];
     const lettura = campagneDaFilePiattaforma(tabella);
-    if (formato.aggregaPerCampagna) lettura.campagne = aggregaPerCampagna(lettura.campagne);
+        if (formato.aggregaPerCampagna) lettura.campagne = aggregaPerCampagna(lettura.campagne, formato);
     if (lettura.impressioniStimate && formato.piattaforma === "Google Ads") {
       correggiImpressioniConAccount(lettura.campagne, totaliAccount);
     }
@@ -922,22 +989,32 @@ async function importaCSV(selettoreFile) {
   aggiornaVista();
 }
 
-function aggregaPerCampagna(campagne) {
-  const perCampagna = new Map();
+function aggregaPerCampagna(campagne, formato) {
+  const campiDaSommare = [
+    ...new Set([
+      ...formato.colonne
+        .filter((colonna) => colonna.campo && colonna.numero && !colonna.nonSommare)
+        .map((colonna) => colonna.campo),
+      "impression", // anche quando è stimata dal CTR, come su Spotify
+    ]),
+  ];
+
+  const perNome = new Map();
 
   campagne.forEach((campagna) => {
-    const chiave = campagna.idCampagna || campagna.campagna;
-    const totale = perCampagna.get(chiave);
-    if (!totale) {
-      perCampagna.set(chiave, { ...campagna });
+    const esistente = perNome.get(campagna.campagna);
+    if (!esistente) {
+      perNome.set(campagna.campagna, { ...campagna });
       return;
     }
-    ["spesa", "impression", "click", "lead", "conversioni", "ricavi"].forEach((campo) => {
-      totale[campo] = String(arrotonda(parseNumero(totale[campo]) + parseNumero(campagna[campo])));
+    campiDaSommare.forEach((campo) => {
+      esistente[campo] = String(
+        arrotonda(parseNumero(esistente[campo]) + parseNumero(campagna[campo])),
+      );
     });
   });
 
-  return [...perCampagna.values()];
+  return [...perNome.values()];
 }
 
 function formatoDellaCampagna(campagna) {
