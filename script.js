@@ -91,6 +91,32 @@ const FORMATI_PIATTAFORMA = {
       { intestazione: "CTR", nomi: ["ctr"], kpi: "ctr" },
     ],
   },
+  spotify: {
+    piattaforma: "Spotify Ads",
+    prefissoFile: "spotify-ads",
+    soloImport: true,
+    aggregaPerCampagna: true,
+    richiede: ["idgruppodiannunci", "percentualedicompletamento"],
+    // preambolo: true, 
+    colonne: [
+      { intestazione: "ID campagna", nomi: ["idcampagna", "campaignid"], campo: "idCampagna" },
+      { intestazione: "Nome della campagna", nomi: ["nomedellacampagna", "campaignname"], campo: "campagna" },
+      { intestazione: "Obiettivo della campagna", nomi: ["obiettivodellacampagna", "campaignobjective"], campo: "obiettivo" },
+      { intestazione: "Stato della campagna", nomi: ["statodellacampagna", "campaignstatus"], campo: "stato" },
+      { intestazione: "ID gruppo di annunci", nomi: ["idgruppodiannunci", "adsetid"], campo: "idGruppo" },
+      { intestazione: "Nome del gruppo di annunci", nomi: ["nomedelgruppodiannunci", "adsetname"], campo: "gruppo" },
+      { intestazione: "Tipo di budget del gruppo di annunci", nomi: ["tipodibudgetdelgruppodiannunci", "adsetbudgettype"], campo: "tipoBudgetGruppo" },
+      { intestazione: "Importo del budget del gruppo di annunci", nomi: ["importodelbudgetdelgruppodiannunci", "adsetbudgetamount"], campo: "budgetGruppo", numero: true, decimali: 2 },
+      { intestazione: "Valuta del gruppo di annunci", nomi: ["valutadelgruppodiannunci", "adsetcurrency"], campo: "valuta" },
+      { intestazione: "ID annuncio", nomi: ["idannuncio", "adid"], campo: "idAnnuncio" },
+      { intestazione: "Nome annuncio", nomi: ["nomeannuncio", "adname"], campo: "annuncio" },
+      { intestazione: "Formato pubblicitario", nomi: ["formatopubblicitario", "adformat"], campo: "formato" },
+      { intestazione: "Fascia di età", nomi: ["fasciadieta", "agerange"], campo: "fasciaEta" },
+      { intestazione: "Clic", nomi: ["clic", "clicks"], campo: "click", numero: true, decimali: 2 },
+      { intestazione: "CTR", nomi: ["ctr"], kpi: "ctr" },
+      { intestazione: "Percentuale di completamento", nomi: ["percentualedicompletamento", "completionrate"], campo: "completamento", numero: true, decimali: 2 },
+    ],
+  },
 };
 
 function leggiCampagne() {
@@ -569,17 +595,23 @@ function riconosciFormato(colonne) {
   if (colonne.includes("cliente") && colonne.includes("campagna")) return "interno";
   if (colonne.includes("nomeaccount") && colonne.includes("impressioni")) return "account";
 
-  const chiave = Object.keys(FORMATI_PIATTAFORMA).find((chiaveFormato) => {
-    const formato = FORMATI_PIATTAFORMA[chiaveFormato];
-    const colonnaCampagna = formato.colonne.find((colonna) => colonna.campo === "campagna");
-    return (
-      trovaColonna(colonne, colonnaCampagna.nomi) >= 0 &&
-      (formato.richiede ?? []).every((nome) => colonne.includes(nome)) &&
-      formato.colonne.some(
-        (colonna) => colonna !== colonnaCampagna && trovaColonna(colonne, colonna.nomi) >= 0,
-      )
-    );
-  });
+  const chiave = Object.keys(FORMATI_PIATTAFORMA)
+    .sort(
+      (a, b) =>
+        (FORMATI_PIATTAFORMA[b].richiede ?? []).length -
+        (FORMATI_PIATTAFORMA[a].richiede ?? []).length,
+    )
+    .find((chiaveFormato) => {
+      const formato = FORMATI_PIATTAFORMA[chiaveFormato];
+      const colonnaCampagna = formato.colonne.find((colonna) => colonna.campo === "campagna");
+      return (
+        trovaColonna(colonne, colonnaCampagna.nomi) >= 0 &&
+        (formato.richiede ?? []).every((nome) => colonne.includes(nome)) &&
+        formato.colonne.some(
+          (colonna) => colonna !== colonnaCampagna && trovaColonna(colonne, colonna.nomi) >= 0,
+        )
+      );
+    });
   return chiave ?? null;
 }
 
@@ -823,8 +855,8 @@ async function importaCSV(selettoreFile) {
   if (conCampagne.length === 0) {
     alert(
       fileScelti.length === 1
-        ? "Il file non è un CSV di Google Ads, di Meta Ads o di questo sito (con le colonne Cliente e Campagna), quindi non può essere importato."
-        : "Nessuno dei file contiene campagne di Google Ads, di Meta Ads o di questo sito, quindi non c'è niente da importare.",
+        ? "Il file non è un CSV di Google Ads, Meta Ads, Spotify Ads o di questo sito (con le colonne Cliente e Campagna), quindi non può essere importato."
+        : "Nessuno dei file contiene campagne di Google Ads, Meta Ads, Spotify Ads o di questo sito, quindi non c'è niente da importare.",
     );
     return;
   }
@@ -842,6 +874,7 @@ async function importaCSV(selettoreFile) {
 
     const formato = FORMATI_PIATTAFORMA[tabella.formato];
     const lettura = campagneDaFilePiattaforma(tabella);
+    if (formato.aggregaPerCampagna) lettura.campagne = aggregaPerCampagna(lettura.campagne);
     if (lettura.impressioniStimate && formato.piattaforma === "Google Ads") {
       correggiImpressioniConAccount(lettura.campagne, totaliAccount);
     }
@@ -887,6 +920,24 @@ async function importaCSV(selettoreFile) {
   const messaggio = importate === 1 ? "Campagna importata!" : `${importate} campagne importate!`;
   alert(nonUsati.length > 0 ? `${messaggio}\n\nFile non usati: ${nonUsati.join(", ")}` : messaggio);
   aggiornaVista();
+}
+
+function aggregaPerCampagna(campagne) {
+  const perCampagna = new Map();
+
+  campagne.forEach((campagna) => {
+    const chiave = campagna.idCampagna || campagna.campagna;
+    const totale = perCampagna.get(chiave);
+    if (!totale) {
+      perCampagna.set(chiave, { ...campagna });
+      return;
+    }
+    ["spesa", "impression", "click", "lead", "conversioni", "ricavi"].forEach((campo) => {
+      totale[campo] = String(arrotonda(parseNumero(totale[campo]) + parseNumero(campagna[campo])));
+    });
+  });
+
+  return [...perCampagna.values()];
 }
 
 function formatoDellaCampagna(campagna) {
