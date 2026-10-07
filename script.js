@@ -185,33 +185,77 @@ const FORMATI_PIATTAFORMA = {
   },
 };
 
+const URL_API = "api_campagne.php";
+
+let campagneCorrenti = [];
+let formatiCorrenti = {};
+
+function tokenCsrf() {
+  return document.querySelector('meta[name="csrf-token"]')?.content ?? "";
+}
+
+async function richiestaAPI(url, opzioni = {}) {
+  const risposta = await fetch(url, { cache: "no-store", credentials: "same-origin", ...opzioni });
+
+  if (risposta.status === 401) {
+    location.href = "index.php";
+    throw new Error("Sessione scaduta");
+  }
+
+  const dati = await risposta.json().catch(() => ({}));
+  if (!risposta.ok) throw new Error(dati.errore || "Operazione non riuscita");
+  return dati;
+}
+
+function scriviSuAPI(corpo) {
+  return richiestaAPI(URL_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": tokenCsrf() },
+    body: JSON.stringify(corpo),
+  });
+}
+
+async function caricaDati() {
+  const [campagne, formati] = await Promise.all([
+    richiestaAPI(`${URL_API}?risorsa=campagne`),
+    richiestaAPI(`${URL_API}?risorsa=formati`),
+  ]);
+  campagneCorrenti = Array.isArray(campagne.campagne) ? campagne.campagne : [];
+  formatiCorrenti = formati.formati && typeof formati.formati === "object" ? formati.formati : {};
+}
+
 function leggiCampagne() {
+  return campagneCorrenti;
+}
+
+async function spostaCampagneDelBrowser() {
+  let campagneLocali;
+  let formatiLocali = {};
+
   try {
-    const dati = localStorage.getItem(CHIAVE_STORAGE);
-    const campagne = dati ? JSON.parse(dati) : [];
-    return Array.isArray(campagne) ? campagne : [];
+    campagneLocali = JSON.parse(localStorage.getItem(CHIAVE_STORAGE));
+    formatiLocali = JSON.parse(localStorage.getItem(CHIAVE_FORMATI_CSV)) ?? {};
   } catch {
-    return [];
+    return;
   }
-}
 
-function salvaCampagne(campagne) {
-  localStorage.setItem(CHIAVE_STORAGE, JSON.stringify(campagne));
-}
+  if (!Array.isArray(campagneLocali) || campagneLocali.length === 0) return;
 
-function leggiFormatiCSV() {
+  const domanda = `In questo browser ci sono ${campagneLocali.length} campagne salvate prima del database. Vuoi spostarle nel database?`;
+  if (!confirm(domanda)) return;
+
   try {
-    const formati = JSON.parse(localStorage.getItem(CHIAVE_FORMATI_CSV));
-    return formati && typeof formati === "object" ? formati : {};
-  } catch {
-    return {};
+    await scriviSuAPI({
+      azione: "salva",
+      campagne: campagneLocali.map(({ id, ...resto }) => resto),
+      formati: formatiLocali,
+    });
+    localStorage.removeItem(CHIAVE_STORAGE);
+    localStorage.removeItem(CHIAVE_FORMATI_CSV);
+    await caricaDati();
+  } catch (errore) {
+    alert(`Spostamento non riuscito: ${errore.message}`);
   }
-}
-
-function ricordaFormatoCSV(chiaveFormato, formatoFile) {
-  const formati = leggiFormatiCSV();
-  formati[chiaveFormato] = formatoFile;
-  localStorage.setItem(CHIAVE_FORMATI_CSV, JSON.stringify(formati));
 }
 
 function parseNumero(valore) {
@@ -454,7 +498,7 @@ function aggiornaVista() {
   applicaFiltri();
 }
 
-function aggiungiCampagna(evento) {
+async function aggiungiCampagna(evento) {
   if (evento && typeof evento.preventDefault === "function") {
     evento.preventDefault();
   }
@@ -476,23 +520,32 @@ function aggiungiCampagna(evento) {
     "ricavi",
   ];
 
-  const nuovaCampagna = { id: Date.now() };
+  const nuovaCampagna = {};
   campi.forEach((campo) => {
     nuovaCampagna[campo] = document.getElementById(campo).value.trim();
   });
 
-  const campagne = leggiCampagne();
-  campagne.push(nuovaCampagna);
-  salvaCampagne(campagne);
+  try {
+    await scriviSuAPI({ azione: "salva", campagne: [nuovaCampagna] });
+    await caricaDati();
+  } catch (errore) {
+    alert(`Campagna non salvata: ${errore.message}`);
+    return;
+  }
 
   alert("Campagna salvata!");
   form.reset();
   aggiornaVista();
 }
 
-function eliminaCampagna(id) {
-  const campagne = leggiCampagne().filter((c) => c.id !== Number(id));
-  salvaCampagne(campagne);
+async function eliminaCampagna(id) {
+  try {
+    await scriviSuAPI({ azione: "elimina", id: Number(id) });
+    await caricaDati();
+  } catch (errore) {
+    alert(`Campagna non eliminata: ${errore.message}`);
+    return;
+  }
   aggiornaVista();
 }
 
@@ -968,20 +1021,19 @@ async function importaCSV(selettoreFile) {
     if (!scelta) return;
 
     campagnePiattaforma.forEach((campagna) => Object.assign(campagna, scelta));
-    formatiDaRicordare.forEach(([chiave, formatoFile]) => ricordaFormatoCSV(chiave, formatoFile));
   }
 
-  const campagne = leggiCampagne();
-  const idUsati = new Set(campagne.map((campagna) => Number(campagna.id)));
-  let nuovoId = Date.now();
-
-  campagneDaSalvare.forEach((nuovaCampagna) => {
-    while (idUsati.has(nuovoId)) nuovoId--;
-    idUsati.add(nuovoId);
-    campagne.push({ id: nuovoId, ...nuovaCampagna });
-  });
-
-  salvaCampagne(campagne);
+  try {
+    await scriviSuAPI({
+      azione: "salva",
+      campagne: campagneDaSalvare,
+      formati: campagnePiattaforma.length > 0 ? Object.fromEntries(formatiDaRicordare) : {},
+    });
+    await caricaDati();
+  } catch (errore) {
+    alert(`Importazione non riuscita: ${errore.message}`);
+    return;
+  }
 
   const importate = campagneDaSalvare.length;
   const messaggio = importate === 1 ? "Campagna importata!" : `${importate} campagne importate!`;
@@ -1036,7 +1088,7 @@ function testoCSVInterno(campagne) {
 
 function testoCSVPiattaforma(chiaveFormato, campagne) {
   const formato = FORMATI_PIATTAFORMA[chiaveFormato];
-  const ricordato = leggiFormatiCSV()[chiaveFormato] ?? {};
+  const ricordato = formatiCorrenti[chiaveFormato] ?? {};
   const separatore = ricordato.separatore ?? ",";
   const decimale = ricordato.decimale ?? ".";
   const virgoletteSeSpazi = ricordato.virgoletteSeSpazi ?? formato.virgoletteSeSpazi ?? false;
@@ -1159,6 +1211,13 @@ function mostraSceltaFileCSV(fileCSV) {
 }
 
 async function scaricaCSV() {
+  try {
+    await caricaDati();
+  } catch (errore) {
+    alert(`Impossibile leggere le campagne dal database: ${errore.message}`);
+    return;
+  }
+
   const campagne = leggiCampagne();
 
   if (campagne.length === 0) {
@@ -1175,19 +1234,7 @@ async function scaricaCSV() {
   }
 }
 
-function svuotaTutto() {
-  const messaggioConferma =
-    "Vuoi cancellare tutte le campagne salvate? L'operazione non si può annullare.";
-  if (leggiCampagne().length > 0 && !confirm(messaggioConferma)) return;
-
-  localStorage.removeItem(CHIAVE_STORAGE);
-  document.getElementById("cercaCampagna").value = "";
-  document.querySelector(".select-piattaforme").value = "tutti";
-  pulisciForm();
-  aggiornaVista();
-}
-
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   document.getElementById("cercaCampagna").addEventListener("input", applicaFiltri);
   document.querySelector(".select-clienti").addEventListener("change", applicaFiltri);
   document.querySelector(".select-piattaforme").addEventListener("change", applicaFiltri);
@@ -1200,7 +1247,21 @@ window.addEventListener("load", () => {
     }
   });
 
+  try {
+    await caricaDati();
+    await spostaCampagneDelBrowser();
+  } catch (errore) {
+    alert(`Impossibile leggere le campagne dal database: ${errore.message}`);
+  }
   aggiornaVista();
+
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState !== "visible") return;
+    try {
+      await caricaDati();
+      aggiornaVista();
+    } catch {}
+  });
 });
 
   // AGGIORNA DATA 

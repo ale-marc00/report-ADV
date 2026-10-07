@@ -453,3 +453,142 @@ legend {
   font-size: 13px;
   color: var(--ink-3);
 }
+
+/* ACCESSO */
+
+.accesso {
+  max-width: 420px;
+  width: 100%;
+  margin: 48px auto 0;
+}
+
+.griglia-accesso {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.errore {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.sessione {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--coloretesto);
+}
+
+.sessione form {
+  margin: 0;
+}
+
+/* ADMIN */
+
+.link-azione {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}
+
+.link-azione:hover {
+  color: var(--accent);
+}
+
+.riepilogo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  border-bottom: 1.5px solid var(--rule);
+}
+
+.dato-admin {
+  padding: 16px 18px;
+  border-right: 1.5px solid var(--rule);
+}
+
+.dato-admin:last-child {
+  border-right: none;
+}
+
+.dato-admin .internotitolo {
+  font-size: 13px;
+  color: var(--coloretesto);
+  margin-bottom: 2px;
+}
+
+.dato-admin .valore {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.tabella-utenti table {
+  min-width: 760px;
+}
+
+.tabella-utenti td input,
+.tabella-utenti td select {
+  min-height: 34px;
+  padding: 4px 8px;
+}
+
+.form-riga {
+  display: contents;
+}
+
+.stato {
+  font-size: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+.stato-attivo {
+  color: var(--good);
+  border-color: var(--good);
+}
+
+.stato-spento {
+  color: var(--ink-3);
+}
+
+.esito {
+  padding: 10px 12px;
+  border: 1px solid var(--good);
+  border-radius: 4px;
+  color: var(--good);
+  font-size: 13px;
+}
+
+.messaggio-pagina {
+  margin-top: 20px;
+}
+
+.password-temporanea {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: var(--surface);
+  border: 1px dashed var(--rule);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink);
+  user-select: all;
+}
+
+td.row-actions {
+  white-space: normal;
+}
+
+[hidden] {
+  display: none !important;
+}
