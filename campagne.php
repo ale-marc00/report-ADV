@@ -13,6 +13,13 @@ $clientiSelect = $pdo->query("
 ")->fetchAll();
 
 $mesiSelect = [];
+$piattaformeSelect = [
+    'meta' => 'Meta ADS',
+    'google' => 'Google ADS',
+    'tiktok' => 'TikTok ADS',
+    'linkedin' => 'LinkedIn ADS',
+    'spotify' => 'Spotify ADS'
+];
 for ($i = 0; $i < 12; $i++) {
     $ts = strtotime("-$i month");
     $mesiSelect[date('Y-m', $ts)] = date('m/Y', $ts);
@@ -77,11 +84,9 @@ for ($i = 0; $i < 12; $i++) {
 
                     <select class="select-piattaforme">
                     <option value="tutti">Tutte le piattaforme</option>
-                    <option value="metaads">Meta ADS</option>
-                    <option value="googleads">Google ADS</option>
-                    <option value="tiktokads">TikTok ADS</option>
-                    <option value="linkedinads">LinkedIn ADS</option>
-                    <option value="spotifyads">Spotify ADS</option>
+                    <?php foreach ($piattaformeSelect as $value => $label): ?>
+                    <option value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></option>
+                    <?php endforeach; ?>
                     </select>
                     
                     <button type="submit" class="bot-azioni">Apri Report PDF</button>

@@ -102,6 +102,9 @@ function preparaCampagna(mixed $campagna): array
     if ($colonne['cliente'] === '' || $colonne['campagna'] === '') {
         throw new ErroreRichiesta('Cliente e nome campagna sono obbligatori.');
     }
+
+    $colonne['piattaforma'] = normalizzaPiattaforma($colonne['piattaforma']);
+    
     if ($colonne['periodo'] !== '' && !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $colonne['periodo'])) {
         throw new ErroreRichiesta('Il mese deve avere il formato AAAA-MM.');
     }
