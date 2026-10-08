@@ -14,6 +14,9 @@ CREATE TABLE users (
 CREATE TABLE clienti (
   id INT PRIMARY KEY AUTO_INCREMENT,
   nome VARCHAR(100) UNIQUE NOT NULL,
+  referente VARCHAR(120) NULL,
+  email VARCHAR(160) NULL,
+  attivo TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -26,6 +29,8 @@ CREATE TABLE campaigns (
   periodo VARCHAR(7) NOT NULL,
   obiettivo VARCHAR(50),
   budget DECIMAL(10, 2) DEFAULT 0,
+  budget_mensile DECIMAL(10, 2) NULL,
+  residuo DECIMAL(10, 2) NULL,
   spesa DECIMAL(10, 2) DEFAULT 0,
   impression BIGINT DEFAULT 0,
   copertura BIGINT DEFAULT 0,
@@ -33,10 +38,13 @@ CREATE TABLE campaigns (
   lead BIGINT DEFAULT 0,
   conversioni DECIMAL(10, 2) DEFAULT 0,
   ricavi DECIMAL(10, 2) DEFAULT 0,
+  attivo TINYINT(1) NOT NULL DEFAULT 1,
+  fonte ENUM('manuale', 'csv') NOT NULL DEFAULT 'manuale',
   extra LONGTEXT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_cliente_periodo (cliente_id, periodo),
+  UNIQUE KEY uq_campagna_periodo (cliente_id, campagna, piattaforma, periodo),
   CONSTRAINT fk_campaigns_cliente FOREIGN KEY (cliente_id) REFERENCES clienti(id)
 );
 

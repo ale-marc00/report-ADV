@@ -109,6 +109,11 @@ $utente = richiediLogin();
                 </div>
             </div>
         </div>
+        <div class="riga-budget" id="rigabudget" hidden>
+            Budget mensile: <strong id="rbbudget">€0</strong>
+            &middot; Speso: <strong id="rbspeso">€0</strong>
+            &middot; Residuo: <strong id="rbresiduo">€0</strong>
+        </div>
 
 
         <!-- TABELLA -->
@@ -286,6 +291,17 @@ $utente = richiediLogin();
                     <label for="importamese">Mese</label>
                     <input id="importamese" type="month" required pattern="\d{4}-\d{2}" placeholder="AAAA-MM">
                 </div>
+
+                <div class="campo">
+                    <label for="importabudget">Budget mensile cliente (&euro;)</label>
+                    <input id="importabudget" type="number" min="0" step="0.01" placeholder="Es. 1500">
+                </div>
+            </div>
+
+            <div class="anteprima-budget" id="anteprimabudget" hidden>
+                <div>Già speso nel mese: <strong id="abspesaesistente">€0</strong></div>
+                <div>Questa importazione: <strong id="abspesaimport">€0</strong></div>
+                <div>Residuo dopo l'import: <strong id="abresiduo">€0</strong></div>
             </div>
 
             <div class="azioni-modulo">

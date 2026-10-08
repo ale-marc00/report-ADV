@@ -377,7 +377,37 @@ function mostraCampagne(campagne, ciSonoCampagneSalvate) {
   aggiornaTotali(campagne);
 }
 
+function aggiornaRigaBudget() {
+  const riga = document.getElementById("rigabudget");
+  if (!riga) return;
+
+  const cliente = document.querySelector(".select-clienti").value;
+  const mese = document.querySelector(".select-mese").value;
+  riga.hidden = true;
+  if (cliente === "tutti" || mese === "tutti") return;
+
+  // il residuo si calcola su tutte le campagne di cliente e mese, senza altri filtri
+  const gruppo = leggiCampagne().filter(
+    (c) =>
+      String(c.cliente).trim().toLowerCase() === cliente.toLowerCase() &&
+      String(c.periodo).trim() === mese,
+  );
+  const conBudget = gruppo.find((c) => c.budget_mensile !== "" && c.budget_mensile != null);
+  if (!conBudget) return;
+
+  const budget = parseNumero(conBudget.budget_mensile);
+  const speso = gruppo.reduce((somma, c) => somma + estraiNumeri(c).spesa, 0);
+  const residuo = budget - speso;
+
+  document.getElementById("rbbudget").textContent = formatEuro(budget);
+  document.getElementById("rbspeso").textContent = formatEuro(speso);
+  document.getElementById("rbresiduo").textContent = formatEuro(residuo);
+  riga.classList.toggle("sforato", residuo < 0);
+  riga.hidden = false;
+}
+
 function aggiornaTotali(campagne) {
+  aggiornaRigaBudget();
   let totaleSpesa = 0;
   let totaleImpression = 0;
   let totaleClick = 0;
@@ -916,10 +946,12 @@ function dataDiOggi() {
   ].join("-");
 }
 
-function chiediClienteEMese(piattaforma, quante, meseProposto) {
+function chiediClienteEMese(piattaforma, quante, meseProposto, spesaImport = 0) {
   const dialogo = document.getElementById("dialogoimporta");
   const campoCliente = document.getElementById("importacliente");
   const campoMese = document.getElementById("importamese");
+  const campoBudget = document.getElementById("importabudget");
+  const anteprima = document.getElementById("anteprimabudget");
   const suggerimenti = document.getElementById("elencoclienti");
 
   document.getElementById("importatitolo").textContent =
@@ -934,8 +966,44 @@ function chiediClienteEMese(piattaforma, quante, meseProposto) {
       suggerimenti.appendChild(suggerimento);
     });
 
+  const campagneDelGruppo = () =>
+    leggiCampagne().filter(
+      (c) =>
+        String(c.cliente).trim().toLowerCase() === campoCliente.value.trim().toLowerCase() &&
+        String(c.periodo).trim() === campoMese.value,
+    );
+
+  const aggiornaAnteprima = () => {
+    const haBudget = campoBudget.value.trim() !== "";
+    anteprima.hidden = !haBudget;
+    if (!haBudget) return;
+
+    const spesaEsistente = campagneDelGruppo().reduce((somma, c) => somma + estraiNumeri(c).spesa, 0);
+    const residuo = parseNumero(campoBudget.value) - spesaEsistente - spesaImport;
+
+    document.getElementById("abspesaesistente").textContent = formatEuro(spesaEsistente);
+    document.getElementById("abspesaimport").textContent = formatEuro(spesaImport);
+    document.getElementById("abresiduo").textContent = formatEuro(residuo);
+    anteprima.classList.toggle("sforato", residuo < 0);
+  };
+
+  // se cliente e mese hanno gia' un budget salvato, lo riproponiamo
+  const precompilaBudget = () => {
+    const conBudget = campagneDelGruppo().find((c) => c.budget_mensile !== "" && c.budget_mensile != null);
+    campoBudget.value = conBudget ? conBudget.budget_mensile : "";
+    aggiornaAnteprima();
+  };
+
+  // oninput (e non addEventListener) per non accumulare listener a ogni apertura
+  campoCliente.oninput = precompilaBudget;
+  campoCliente.onchange = precompilaBudget;
+  campoMese.oninput = precompilaBudget;
+  campoBudget.oninput = aggiornaAnteprima;
+
   campoCliente.value = "";
   campoMese.value = meseProposto || dataDiOggi().slice(0, 7);
+  campoBudget.value = "";
+  anteprima.hidden = true;
   dialogo.returnValue = "";
   dialogo.showModal();
 
@@ -945,7 +1013,7 @@ function chiediClienteEMese(piattaforma, quante, meseProposto) {
       () => {
         risolvi(
           dialogo.returnValue === "importa"
-            ? { cliente: campoCliente.value.trim(), periodo: campoMese.value }
+            ? { cliente: campoCliente.value.trim(), periodo: campoMese.value, budget: campoBudget.value }
             : null,
         );
       },
@@ -1005,6 +1073,7 @@ async function importaCSV(selettoreFile) {
   });
 
   const campagneDaSalvare = [...campagneInterne, ...campagnePiattaforma];
+  campagneDaSalvare.forEach((campagna) => (campagna.fonte = "csv"));
 
   if (campagneDaSalvare.length === 0) {
     alert("Nel file non ci sono campagne da importare.");
@@ -1013,14 +1082,22 @@ async function importaCSV(selettoreFile) {
 
   if (campagnePiattaforma.length > 0) {
     const piattaforme = [...new Set(campagnePiattaforma.map((campagna) => campagna.piattaforma))];
+    const spesaImport = campagnePiattaforma.reduce((somma, campagna) => somma + estraiNumeri(campagna).spesa, 0);
     const scelta = await chiediClienteEMese(
       piattaforme.join(" e "),
       campagnePiattaforma.length,
       meseProposto,
+      spesaImport,
     );
     if (!scelta) return;
 
-    campagnePiattaforma.forEach((campagna) => Object.assign(campagna, scelta));
+    campagnePiattaforma.forEach((campagna) =>
+      Object.assign(campagna, {
+        cliente: scelta.cliente,
+        periodo: scelta.periodo,
+        budget_mensile: scelta.budget, // "" se lasciato vuoto
+      }),
+    );
   }
 
   try {

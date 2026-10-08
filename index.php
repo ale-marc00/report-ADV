@@ -113,7 +113,7 @@ $csrf = tokenCsrf();
                 </div>
 
                 <div class="azioni-modulo">
-                    <button type="submit" class="bot-azioni">Accedi</button>
+                    <button type="submit" method="post" class="bot-azioni">Accedi</button>
                 </div>
             </form>
         </section>

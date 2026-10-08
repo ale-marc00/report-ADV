@@ -592,3 +592,22 @@ td.row-actions {
 [hidden] {
   display: none !important;
 }
+
+
+/* BUDGET MENSILE E RESIDUO */
+.anteprima-budget,
+.riga-budget {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1.5px solid var(--rule);
+  line-height: 1.6;
+}
+.anteprima-budget strong,
+.riga-budget strong {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.anteprima-budget.sforato #abresiduo,
+.riga-budget.sforato #rbresiduo {
+  color: #c0392b;
+}
