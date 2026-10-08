@@ -10,6 +10,7 @@ header('X-Content-Type-Options: nosniff');
 const LIMITI_TESTO = ['cliente' => 100, 'campagna' => 255, 'piattaforma' => 50, 'periodo' => 7, 'obiettivo' => 50];
 const COLONNE_DECIMALI = ['budget', 'spesa', 'conversioni', 'ricavi'];
 const COLONNE_INTERE = ['impression', 'copertura', 'click', 'lead'];
+const PIATTAFORME = ['meta', 'google', 'tiktok', 'linkedin', 'spotify'];
 const VALORE_MASSIMO = 99999999.99;
 const CAMPAGNE_PER_RICHIESTA = 2000;
 const DIMENSIONE_MASSIMA_EXTRA = 60000;
@@ -45,8 +46,6 @@ function campagnaDallaRiga(array $riga): array
     foreach ([...COLONNE_DECIMALI, ...COLONNE_INTERE] as $colonna) {
         $campagna[$colonna] = numeroComeTesto((string) $riga[$colonna]);
     }
-    $campagna['budget_mensile'] = $riga['budget_mensile'] !== null ? numeroComeTesto((string) $riga['budget_mensile']) : '';
-    $campagna['residuo'] = $riga['residuo'] !== null ? numeroComeTesto((string) $riga['residuo']) : '';
     $campagna['id'] = (int) $riga['id'];
 
     return $campagna;
@@ -68,6 +67,17 @@ function valoreNumerico(mixed $valore, string $colonna): float
         throw new ErroreRichiesta("Il valore di «{$colonna}» è troppo grande.");
     }
     return $numero;
+}
+
+function normalizzaPiattaforma(string $valore): string
+{
+    $pulito = strtolower(trim($valore));
+    $pulito = preg_replace('/\s*ads?$/', '', $pulito);
+
+    if (!in_array($pulito, PIATTAFORME, true)) {
+        throw new ErroreRichiesta("Piattaforma non valida: «{$valore}».");
+    }
+    return $pulito;
 }
 
 function preparaCampagna(mixed $campagna): array
@@ -103,17 +113,10 @@ function preparaCampagna(mixed $campagna): array
         $colonne[$colonna] = (int) round(valoreNumerico($campagna[$colonna] ?? null, $colonna));
     }
 
-    $budgetMensile = $campagna['budget_mensile'] ?? '';
-    $colonne['budget_mensile'] = ($budgetMensile === '' || $budgetMensile === null)
-        ? null
-        : round(valoreNumerico($budgetMensile, 'budget_mensile'), 2);
-
-    $colonne['fonte'] = (($campagna['fonte'] ?? '') === 'csv') ? 'csv' : 'manuale';
-
     $extra = array_diff_key(
         $campagna,
         $colonne,
-        ['id' => 0, 'created_at' => 0, 'updated_at' => 0, 'extra' => 0, 'residuo' => 0]
+        ['id' => 0, 'created_at' => 0, 'updated_at' => 0, 'extra' => 0]
     );
     $testoExtra = $extra ? json_encode($extra, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) : null;
     if ($testoExtra !== null && strlen($testoExtra) > DIMENSIONE_MASSIMA_EXTRA) {
@@ -167,29 +170,6 @@ function salvaFormati(PDO $db, mixed $formati): void
     }
 }
 
-function ricalcolaMese(PDO $db, int $clienteId, string $periodo): void
-{
-    if ($periodo === '') {
-        return;
-    }
-
-    // le righe senza budget ereditano quello gia' presente per cliente e mese
-    $db->prepare(
-        'UPDATE campaigns c
-         JOIN (SELECT MAX(budget_mensile) AS b FROM campaigns WHERE cliente_id = ? AND periodo = ?) m
-         SET c.budget_mensile = m.b
-         WHERE c.cliente_id = ? AND c.periodo = ? AND c.budget_mensile IS NULL AND m.b IS NOT NULL'
-    )->execute([$clienteId, $periodo, $clienteId, $periodo]);
-
-    // residuo = budget mensile - somma delle spese di cliente e mese
-    $db->prepare(
-        'UPDATE campaigns c
-         JOIN (SELECT SUM(spesa) AS tot FROM campaigns WHERE cliente_id = ? AND periodo = ?) t
-         SET c.residuo = c.budget_mensile - t.tot
-         WHERE c.cliente_id = ? AND c.periodo = ? AND c.budget_mensile IS NOT NULL'
-    )->execute([$clienteId, $periodo, $clienteId, $periodo]);
-}
-
 function salva(PDO $db, array $corpo): array
 {
     $campagne = $corpo['campagne'] ?? [];
@@ -202,33 +182,15 @@ function salva(PDO $db, array $corpo): array
     $db->beginTransaction();
     try {
         $inserimento = $db->prepare(
-            'INSERT INTO campaigns (cliente_id, campagna, piattaforma, periodo, obiettivo, budget, budget_mensile, spesa,
-                impression, copertura, click, lead, conversioni, ricavi, extra, fonte)
-             VALUES (:cliente_id, :campagna, :piattaforma, :periodo, :obiettivo, :budget, :budget_mensile, :spesa,
-                :impression, :copertura, :click, :lead, :conversioni, :ricavi, :extra, :fonte)
-             ON DUPLICATE KEY UPDATE
-                obiettivo = VALUES(obiettivo), budget = VALUES(budget),
-                budget_mensile = COALESCE(VALUES(budget_mensile), budget_mensile),
-                spesa = VALUES(spesa), impression = VALUES(impression), copertura = VALUES(copertura),
-                click = VALUES(click), lead = VALUES(lead), conversioni = VALUES(conversioni),
-                ricavi = VALUES(ricavi), extra = VALUES(extra), fonte = VALUES(fonte)'
+            'INSERT INTO campaigns (cliente_id, campagna, piattaforma, periodo, obiettivo, budget, spesa,
+                impression, copertura, click, lead, conversioni, ricavi, extra)
+             VALUES (:cliente_id, :campagna, :piattaforma, :periodo, :obiettivo, :budget, :spesa,
+                :impression, :copertura, :click, :lead, :conversioni, :ricavi, :extra)'
         );
-        $gruppi = [];
         foreach ($pronte as $colonne) {
             $colonne['cliente_id'] = idCliente($db, $colonne['cliente']);
             unset($colonne['cliente']);
             $inserimento->execute($colonne);
-            $gruppi[$colonne['cliente_id'] . '|' . $colonne['periodo']] = [
-                $colonne['cliente_id'], $colonne['periodo'], $colonne['budget_mensile'],
-            ];
-        }
-        foreach ($gruppi as [$clienteId, $periodo, $budgetMensile]) {
-            if ($budgetMensile !== null && $periodo !== '') {
-                // il budget inserito vale per tutto il mese del cliente
-                $db->prepare('UPDATE campaigns SET budget_mensile = ? WHERE cliente_id = ? AND periodo = ?')
-                    ->execute([$budgetMensile, $clienteId, $periodo]);
-            }
-            ricalcolaMese($db, (int) $clienteId, (string) $periodo);
         }
         if (isset($corpo['formati'])) {
             salvaFormati($db, $corpo['formati']);
@@ -296,22 +258,11 @@ try {
             if ($id === false) {
                 throw new ErroreRichiesta('Campagna non valida.');
             }
-            $db->beginTransaction();
-            try {
-                $trova = $db->prepare('SELECT cliente_id, periodo FROM campaigns WHERE id = ?');
-                $trova->execute([$id]);
-                $riga = $trova->fetch();
-                $db->prepare('DELETE FROM campaigns WHERE id = ?')->execute([$id]);
-                if ($riga) {
-                    ricalcolaMese($db, (int) $riga['cliente_id'], (string) $riga['periodo']);
-                }
-                $db->commit();
-            } catch (Throwable $errore) {
-                if ($db->inTransaction()) {
-                    $db->rollBack();
-                }
-                throw $errore;
-            }
+            $db->prepare('DELETE FROM campaigns WHERE id = ?')->execute([$id]);
+            rispondi(['ok' => true]);
+
+        case 'svuota':
+            $db->exec('DELETE FROM campaigns');
             rispondi(['ok' => true]);
 
         default:

@@ -63,7 +63,7 @@ hr {
   background-color: black;
   border: none;
   padding: 0;
-}
+} 
 
 /* FILTRO */
 
@@ -121,7 +121,7 @@ select:focus {
 }
 
 .bot-azioni {
-  height: 40px;
+/* height: 40px; */
   background-color: var(--sfondo);
   border-radius: 4px;
   border: 1px solid #000000;
@@ -593,21 +593,56 @@ td.row-actions {
   display: none !important;
 }
 
+@page { size: A4; margin: 1cm; }
 
-/* BUDGET MENSILE E RESIDUO */
-.anteprima-budget,
-.riga-budget {
-  margin: 12px 0;
-  padding: 10px 12px;
-  border: 1.5px solid var(--rule);
-  line-height: 1.6;
+@media print {
+    .no-print, .sugg { display: none !important; }
+    body {
+        width: auto;
+        height: auto;
+        margin: 0;
+        padding: 0;
+    }
+    html, body { background: #fff !important; }
+
+    /* Tabella campagne: in PDF niente scroll, tutto dentro la pagina */
+    .tabella { padding: 12px 0 0; border: 0; background: transparent; }
+    .tabella-wrapper { overflow: visible !important; width: 100%; }
+    table { min-width: 0 !important; width: 100%; table-layout: auto; }
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
+    th, td {
+        white-space: normal !important;
+        word-break: break-word;
+        padding: 6px 6px;
+        font-size: 11px;
+    }
+    td.num { font-size: 11px; white-space: nowrap !important; }
 }
-.anteprima-budget strong,
-.riga-budget strong {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
+a{
+  text-decoration: none;
+  color:black;
 }
-.anteprima-budget.sforato #abresiduo,
-.riga-budget.sforato #rbresiduo {
-  color: #c0392b;
+.form-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-report select {
+  min-height: 40px;
+  padding: 8px 10px;
+}
+
+.variazione {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.variazione span { font-weight: 400; opacity: .7; }
+.variazione.buona { color: #15803d; }
+.variazione.cattiva { color: #b91c1c; }
+.variazione.neutra { color: #555; }
+@media print {
+  .variazione { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

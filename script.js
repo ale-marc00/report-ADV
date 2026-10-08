@@ -1317,6 +1317,15 @@ window.addEventListener("load", async () => {
   document.querySelector(".select-piattaforme").addEventListener("change", applicaFiltri);
   document.querySelector(".select-mese").addEventListener("change", applicaFiltri);
 
+  document.querySelector(".form-report").addEventListener("submit", (evento) => {
+    const cliente = document.querySelector(".select-clienti").value;
+    const mese = document.querySelector(".select-mese").value;
+    if (cliente === "tutti" || mese === "tutti") {
+      evento.preventDefault();
+      alert("Per aprire il report scegli un cliente e un mese specifici.");
+    }
+  });
+
   document.getElementById("campagnatabella").addEventListener("click", (evento) => {
     const bottone = evento.target.closest("button[data-id]");
     if (bottone) {
